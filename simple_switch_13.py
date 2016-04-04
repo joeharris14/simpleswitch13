@@ -22,6 +22,7 @@ from ryu.lib.packet import packet
 from ryu.lib.packet import ethernet, udp
 import dpkt
 from ryu.lib.packet import ether_types
+import time
 
 
 class SimpleSwitch13(app_manager.RyuApp):
@@ -91,6 +92,8 @@ class SimpleSwitch13(app_manager.RyuApp):
 	#OUR CODE	
 	pkt_udp = pkt.get_protocol(udp.udp)
         dns = 0
+	#fr = open('blacklist.txt', 'r')
+	fw = open('/home/jackson/Documents/test/monitor.txt', 'a')
 	if pkt_udp:
                 if pkt_udp.src_port == 53 or pkt_udp.dst_port == 53:
                     #*** Use dpkt to parse UDP DNS data:
@@ -102,19 +105,18 @@ class SimpleSwitch13(app_manager.RyuApp):
                             "Exception %s, %s, %s",
                              exc_type, exc_value, exc_traceback)
         if dns:
-                print(dns.qd)
-
-        
-        '''if(pkt_udp and pkt_udp.dst_port == 53):
-            data_len = len(msg.data)
-            name_len = pkt_udp.total_length - 8 - 12 - 4
-            #print('data_len = {}, name_len = {}'.format(data_len, name_len))
-            outputStr = msg.data[data_len - 4 - name_len:data_len - 4]
-            print(outputStr)
-            #print(len(msg.data))'''
-            
-  
-
+		for qname in dns.qd:
+		    print(qname.name)
+		    src_mac = eth.src
+		    timestamp = time.strftime('%d-%m-%Y %H-%M-%S ')
+		    fileStr = timestamp + src_mac + ' ' + qname.name + '\n'
+		    fw.write(fileStr)
+		    
+		#return
+                #print(eth.src + " " + dns.qd)
+     
+        #if pkt_udp.src_port == 53:
+	 #   return
            
 
              
